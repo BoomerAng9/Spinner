@@ -55,6 +55,16 @@
   @keyframes p{0%{box-shadow:0 0 0 0 rgba(242,169,0,.5)}70%{box-shadow:0 0 0 12px rgba(242,169,0,0)}100%{box-shadow:0 0 0 0 rgba(242,169,0,0)}}
   .lbtxt{flex:1;line-height:1.2}.lbtxt .t1{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--g-orange)}.lbtxt .t2{font-size:13.5px;font-weight:600;margin-top:2px;color:var(--ink)}
   .wave{display:flex;align-items:center;gap:2px;height:20px}.wave i{width:2.5px;border-radius:3px;background:var(--amber);height:4px;opacity:.4;transition:height .08s}
+  .lensbar{display:flex;gap:7px;overflow-x:auto;padding:8px 18px 4px;scrollbar-width:none}.lensbar::-webkit-scrollbar{display:none}
+  .lchip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:24px;padding:7px 13px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.12s}
+  .lchip.on{color:#fff;border-color:transparent}
+  .syn{align-self:stretch;border-radius:14px;padding:13px;background:var(--surface);border:1px solid var(--line);box-shadow:0 6px 16px -12px rgba(20,22,26,.35)}
+  .syn .st{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);margin-bottom:7px}
+  .syn ul{list-style:none;display:flex;flex-direction:column;gap:6px}.syn li{font-size:13px;line-height:1.4;padding-left:16px;position:relative}.syn li::before{content:"•";position:absolute;left:2px;color:var(--amber)}
+  .syn li.act::before{content:"☐";color:var(--g-green)}.syn li.idea::before{content:"→";color:var(--g-orange)}
+  .toneint{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .ti{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:20px;background:rgba(42,163,154,.12);color:#1d5b55;border:1px solid rgba(42,163,154,.25)}
+  .ti b{color:var(--tac)}
   .stream{flex:1;overflow-y:auto;padding:10px 16px;display:flex;flex-direction:column;gap:10px}
   .hint{margin:auto;text-align:center;color:var(--muted-2);max-width:300px}.hint .big{font-family:var(--disp);font-weight:600;font-size:21px;color:var(--ink);margin-bottom:8px;letter-spacing:.01em}.hint p{font-size:13px;line-height:1.5}
   .said{max-width:84%;font-size:13px;line-height:1.42;padding:9px 12px;border-radius:14px;animation:rise .3s ease}
@@ -128,6 +138,14 @@
       <div class="lbtxt"><div class="t1" id="lFork">Fork</div><div class="t2" id="lState">Tap the mic to go live</div></div>
       <div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </div>
+    <div class="lensbar" id="lensbar">
+      <button class="lchip" data-lens="translate" data-c="var(--g-blue)">🌐 Translate</button>
+      <button class="lchip" data-lens="decode" data-c="var(--g-teal)">◎ Decoder</button>
+      <button class="lchip" data-lens="explain" data-c="var(--g-orange)">💡 Explainer</button>
+      <button class="lchip" data-lens="summarize" data-c="var(--g-green)">☰ Summarize</button>
+      <button class="lchip" data-lens="research" data-c="#7b53c6">🔎 Research</button>
+      <button class="lchip" data-lens="ideate" data-c="#c9a227">✦ Ideate</button>
+    </div>
     <div class="stream" id="stream">
       <div class="hint" id="hint"><div class="big" id="hintBig">It listens. It explains.</div><p id="hintP">Tap the mic and let it hear the conversation — or type a line to try it. No prompting.</p></div>
     </div>
@@ -175,6 +193,9 @@ const DEFAULT_FORKS=[
 ];
 let forks=JSON.parse(localStorage.getItem("spinner_forks")||"null")||DEFAULT_FORKS;
 let selected=null, active=null;
+let curLens="decode", transcript=[];
+const LENS_LABEL={translate:"Translate",decode:"Decoder",explain:"Explainer",summarize:"Summarize",research:"Research",ideate:"Ideate"};
+async function api(path,body){body.target_lang="en";const r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok)throw new Error(path+" "+r.status);return r.json();}
 function saveForks(){localStorage.setItem("spinner_forks",JSON.stringify(forks))}
 function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2400)}
 
@@ -191,11 +212,26 @@ function renderForks(){
 }
 function goLiveSelected(){const f=forks.find(x=>x.id===selected);if(f)openFork(f)}
 function openFork(f){
-  active=f;
+  active=f; transcript=[]; curLens=(f.lens==="translate")?"translate":"decode";
   $("vForks").classList.remove("show");$("vLive").classList.add("show");$("backBtn").style.display="";
-  $("lFork").textContent=`${f.icon} ${f.name}`+(f.lens==="translate"?"":" · decoder");
+  $("lFork").textContent=`${f.icon} ${f.name}`;
   $("lState").textContent="Tap the mic to go live";
-  $("stream").innerHTML=`<div class="hint" id="hint"><div class="big">${f.lens==="translate"?"Everyone speaks. You read.":"It listens. It explains."}</div><p>${f.lens==="translate"?"Any language in the room is rendered into yours, live.":"Tap the mic and let it hear the conversation — or type a line. No prompting."}</p></div>`;
+  $("stream").innerHTML=`<div class="hint" id="hint"><div class="big">It listens. Every angle.</div><p>Tap the mic and let it hear the conversation — or type a line. Switch lenses any time, no prompting.</p></div>`;
+  setLens(curLens,true);
+}
+function setLens(lens,silent){
+  curLens=lens;
+  document.querySelectorAll(".lchip").forEach(c=>{const on=c.dataset.lens===lens;c.classList.toggle("on",on);c.style.background=on?c.dataset.c:"";});
+  if((lens==="summarize"||lens==="ideate")&&!silent)runSynthesis(lens);
+}
+async function runSynthesis(lens){
+  if(!transcript.length){toast("Nothing captured yet");return;}
+  const ph=document.createElement("div");ph.className="syn";ph.innerHTML=`<div class="st"><span class="working" style="border-color:rgba(0,0,0,.15);border-top-color:var(--amber)"></span>${LENS_LABEL[lens]}…</div>`;$("stream").appendChild(ph);$("stream").scrollTop=$("stream").scrollHeight;
+  try{const r=await api("/lens",{lens,transcript:transcript.join("\n")});
+    if(lens==="summarize"){const p=r.points||[],a=r.actions||[];ph.innerHTML=`<div class="st">☰ Summary</div><ul>${p.map(x=>`<li>${esc(x)}</li>`).join("")}${a.map(x=>`<li class="act">${esc(x)}</li>`).join("")}</ul>`;}
+    else{const i=r.ideas||[];ph.innerHTML=`<div class="st">✦ Your next moves</div><ul>${i.map(x=>`<li class="idea">${esc(x)}</li>`).join("")}</ul>`;}
+    $("stream").scrollTop=$("stream").scrollHeight;
+  }catch(e){ph.remove();toast("synthesis failed — retry")}
 }
 function toForks(){stopMic();$("vLive").classList.remove("show");$("vForks").classList.add("show");$("backBtn").style.display="none"}
 
@@ -204,21 +240,28 @@ function esc(s){return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replac
 
 async function handleText(text){
   if(!text)return;
-  if(active.lens==="translate"){
-    pushTo(`<div class="said off"><div class="who">heard</div>${esc(text)}</div>`);
-    try{const r=await fetch(API+"/ingest",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text,target_lang:"en"})}).then(r=>r.json());
-      pushTo(`<div class="ex"><div class="et">🌐 ${esc(r.detected_language||"")}</div><div class="em">${esc(r.translation||"")}</div></div>`);
-    }catch(e){toast("network hiccup — retry")}
-  }else{
-    pushTo(`<div class="said off"><div class="who">heard</div>${esc(text)}</div>`);
-    const ph=document.createElement("div");ph.className="ex";ph.innerHTML=`<div class="et"><span class="working" style="border-color:rgba(0,0,0,.15);border-top-color:var(--amber)"></span>reading…</div>`;$("stream").appendChild(ph);$("stream").scrollTop=$("stream").scrollHeight;
-    try{const r=await fetch(API+"/decode",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text,industry:active.id,target_lang:"en"})}).then(r=>r.json());
-      ph.remove();const fl=r.flags||[];
-      if(!fl.length){pushTo(`<div class="ex ok"><div class="et">✓ clear</div><div class="em">Nothing loaded in that — you're good.</div></div>`);}
-      else fl.forEach(f=>pushTo(`<div class="ex ${f.risk?'warn':''}"><div class="et">${f.risk?'⚠ watch this':'ℹ '+esc(f.term||'')}</div><div class="em"><b>${esc(f.term||'')}.</b> ${esc(f.plain||'')} ${f.why?'<br><span style="color:var(--muted)">'+esc(f.why)+'</span>':''}</div></div>`));
-    }catch(e){ph.remove();toast("network hiccup — retry")}
-  }
+  transcript.push(text);
+  pushTo(`<div class="said off"><div class="who">heard</div>${esc(text)}</div>`);
+  if(curLens==="summarize"||curLens==="ideate"){runSynthesis(curLens);return;}
+  applyTurnLens(curLens,text);
 }
+async function applyTurnLens(lens,text){
+  const ph=document.createElement("div");ph.className="ex";ph.innerHTML=`<div class="et"><span class="working" style="border-color:rgba(0,0,0,.15);border-top-color:var(--amber)"></span>${LENS_LABEL[lens]||"reading"}…</div>`;$("stream").appendChild(ph);$("stream").scrollTop=$("stream").scrollHeight;
+  try{
+    if(lens==="translate"){const r=await api("/ingest",{text});ph.remove();pushTo(`<div class="ex"><div class="et">🌐 ${esc(r.detected_language||"")}</div><div class="em">${esc(r.translation||"")}</div></div>`);}
+    else if(lens==="decode"){const r=await api("/decode",{text,industry:active.id});ph.remove();renderDecode(r);}
+    else if(lens==="explain"){const r=await api("/lens",{lens:"explain",text});ph.remove();pushTo(`<div class="ex"><div class="et" style="color:#a8551a">💡 in simple terms</div><div class="em">${esc(r.explanation||"")}</div></div>`);}
+    else if(lens==="research"){const r=await api("/lens",{lens:"research",text});ph.remove();const f=r.facts||[];pushTo(`<div class="ex"><div class="et" style="color:#6a47ad">🔎 the context</div><div class="em"><ul style="list-style:none;margin:0">${f.map(x=>`<li style="position:relative;padding-left:14px;margin:3px 0"><span style="position:absolute;left:0;color:#7b53c6">•</span>${esc(x)}</li>`).join("")}</ul></div></div>`);}
+    else{ph.remove();}
+  }catch(e){ph.remove();toast("network hiccup — retry")}
+}
+function renderDecode(r){
+  const fl=r.flags||[];
+  if(r.tone||r.intent){pushTo(`<div class="ex"><div class="toneint">${r.tone?`<span class="ti">tone: <b>${esc(r.tone)}</b></span>`:""}${r.intent?`<span class="ti">intent: <b>${esc(r.intent)}</b></span>`:""}</div>${fl.length?'':'<div class="em" style="color:var(--muted)">Nothing loaded — clear.</div>'}</div>`);}
+  else if(!fl.length){pushTo(`<div class="ex ok"><div class="et">✓ clear</div><div class="em">Nothing loaded in that — you're good.</div></div>`);}
+  fl.forEach(f=>pushTo(`<div class="ex ${f.risk?'warn':''}"><div class="et">${f.risk?'⚠ watch this':'ℹ '+esc(f.term||'')}</div><div class="em"><b>${esc(f.term||'')}.</b> ${esc(f.plain||'')} ${f.why?'<br><span style="color:var(--muted)">'+esc(f.why)+'</span>':''}</div></div>`));
+}
+document.getElementById("lensbar").addEventListener("click",e=>{const c=e.target.closest(".lchip");if(c)setLens(c.dataset.lens);});
 function sendTyped(){const v=$("typed").value.trim();if(!v)return;$("typed").value="";handleText(v)}
 
 /* ── mic: VAD-segmented → WAV → ingest → (decode) ── */
@@ -232,7 +275,7 @@ function startRec(){chunks=[];let mime="audio/webm";if(!MediaRecorder.isTypeSupp
 function cutUtterance(){if(rec&&rec.state==="recording"){rec.stop();setTimeout(()=>{if(listening)startRec()},60)}}
 function monitor(){const buf=new Uint8Array(analyser.fftSize);const tick=()=>{if(!listening)return;analyser.getByteTimeDomainData(buf);let s=0;for(let i=0;i<buf.length;i++){const v=(buf[i]-128)/128;s+=v*v}const rms=Math.sqrt(s/buf.length);const bars=$("wave").children;const lv=Math.min(rms*5,1);for(let i=0;i<bars.length;i++){const on=lv>(i/bars.length);bars[i].style.height=(on?(5+lv*15):4)+"px";bars[i].style.opacity=on?.9:.35}const t=performance.now();if(rms>0.025){if(!speaking){speaking=true;speechStart=t}silenceStart=t}else if(speaking&&t-silenceStart>1050&&t-speechStart>500){speaking=false;cutUtterance()}rafId=requestAnimationFrame(tick)};tick()}
 function stopMic(){listening=false;if(rafId)cancelAnimationFrame(rafId);try{if(rec&&rec.state==="recording")rec.stop()}catch(e){}try{micStream.getTracks().forEach(t=>t.stop())}catch(e){}try{audioCtx&&audioCtx.close()}catch(e){}$("micBtn").classList.remove("live");$("pulse").classList.remove("live");$("lState").textContent="Paused · tap to resume";const bars=$("wave").children;for(let i=0;i<bars.length;i++){bars[i].style.height="4px";bars[i].style.opacity=.35}}
-async function processUtterance(blob){try{const wav=await blobToWavB64(blob);if(!wav)return;const r=await fetch(API+"/ingest",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({audio_b64:wav,audio_format:"wav",target_lang:"en"})}).then(r=>r.json());if(!(r&&r.translation&&!r.empty))return;if(active.lens==="translate"){pushTo(`<div class="ex"><div class="et">🌐 ${esc(r.detected_language||"")}</div><div class="em">${esc(r.translation||"")}</div><div class="orig">"${esc(r.original_text||"")}"</div></div>`)}else{handleText(r.translation)}}catch(e){}}
+async function processUtterance(blob){try{const wav=await blobToWavB64(blob);if(!wav)return;const r=await fetch(API+"/ingest",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({audio_b64:wav,audio_format:"wav",target_lang:"en"})}).then(r=>r.json());if(!(r&&r.translation&&!r.empty))return;const txt=r.translation;transcript.push(txt);pushTo(`<div class="said off"><div class="who">heard${r.detected_language&&r.detected_language!=="English"?" · "+esc(r.detected_language):""}</div>${esc(r.original_text||txt)}</div>`);if(curLens==="summarize"||curLens==="ideate"){runSynthesis(curLens);}else if(curLens==="translate"){pushTo(`<div class="ex"><div class="et">🌐 ${esc(r.detected_language||"")}</div><div class="em">${esc(txt)}</div></div>`);}else{applyTurnLens(curLens,txt);}}catch(e){}}
 async function blobToWavB64(blob){const ab=await blob.arrayBuffer();const dctx=new(window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,1,16000);let dec;try{dec=await dctx.decodeAudioData(ab)}catch(e){return null}const sr=16000,len=Math.ceil(dec.duration*sr);const off=new OfflineAudioContext(1,len,sr);const bs=off.createBufferSource();bs.buffer=dec;bs.connect(off.destination);bs.start();const rb=await off.startRendering();const data=rb.getChannelData(0);const buf=new ArrayBuffer(44+data.length*2);const v=new DataView(buf);const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};w(0,"RIFF");v.setUint32(4,36+data.length*2,true);w(8,"WAVE");w(12,"fmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,"data");v.setUint32(40,data.length*2,true);let o=44;for(let i=0;i<data.length;i++){let x=Math.max(-1,Math.min(1,data[i]));v.setInt16(o,x<0?x*0x8000:x*0x7FFF,true);o+=2}const by=new Uint8Array(buf);let bin="";for(let i=0;i<by.length;i++)bin+=String.fromCharCode(by[i]);return btoa(bin)}
 
 /* ── new fork (Chicken Hawk builds simple; gate → Charlotte for big) ── */
