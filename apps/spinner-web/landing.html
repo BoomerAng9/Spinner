@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPINNER — one conversation, every angle.</title>
+<meta name="description" content="SPINNER is a realtime conversation super-app. It listens to what's happening around you and explains it live — translate, decode, explain, summarize, research, ideate. One tap, any lens.">
+<meta name="theme-color" content="#15161a">
+<meta property="og:title" content="SPINNER — one conversation, every angle.">
+<meta property="og:description" content="A realtime conversation super-app. It listens and explains, live. Translate · Decode · Explain · Summarize · Research · Ideate.">
+<meta property="og:image" content="https://brewing.foai.cloud/spinner-keyart.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/spinner-logo.png"><link rel="apple-touch-icon" href="/spinner-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--amber:#F2A900;--amber-2:#ffc23d;--g-blue:#1f74d0;--g-teal:#2aa39a;--g-green:#39ab3f;--g-orange:#e8821f;--g-red:#cf3a2c;
+    --bg:#eeebe3;--bg2:#f5f3ec;--surface:#ffffff;--tac:#15161a;--ink:#1a1b1f;--muted:#6c6d75;--muted-2:#a2a29a;--line:rgba(20,22,26,.10);
+    --disp:'Chakra Petch',sans-serif;--sans:'Geist',system-ui,sans-serif;--mono:'Geist Mono',monospace}
+  *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);line-height:1.5;
+    background:radial-gradient(55% 38% at 88% -6%,rgba(232,130,31,.10),transparent 60%),radial-gradient(50% 40% at 3% 8%,rgba(31,116,208,.10),transparent 55%),var(--bg)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  a{color:inherit;text-decoration:none}
+  .squad{display:flex;gap:5px}.squad i{width:26px;height:5px;border-radius:3px}
+  .btn{display:inline-flex;align-items:center;gap:9px;height:50px;padding:0 24px;border-radius:30px;font-weight:600;font-size:15px;cursor:pointer;border:none}
+  .btn.solid{background:var(--tac);color:#fff}.btn.solid svg{width:18px;height:18px;fill:var(--amber)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn.grad{background:linear-gradient(110deg,var(--g-blue),var(--g-green),var(--g-orange));color:#fff}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--g-orange)}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:40;backdrop-filter:blur(10px);background:rgba(238,235,227,.78);border-bottom:1px solid var(--line)}
+  .navin{display:flex;align-items:center;gap:12px;height:64px}
+  .navin img{height:34px;width:34px;object-fit:contain;border-radius:8px}
+  .navin .mk{font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:.05em;color:var(--tac)}
+  .navin .links{margin-left:auto;display:flex;align-items:center;gap:24px}
+  .navin .links a{font-size:14px;color:var(--muted);font-weight:500}.navin .links a:hover{color:var(--ink)}
+  .navin .btn{height:42px;font-size:14px;padding:0 18px}
+  @media(max-width:720px){.navin .links a:not(.launch){display:none}}
+
+  /* hero */
+  .hero{padding:62px 0 40px;display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center}
+  .hero h1{font-family:var(--disp);font-weight:700;font-size:62px;line-height:.96;letter-spacing:.01em;color:var(--tac);margin:14px 0 16px}
+  .hero h1 .am{color:var(--amber)}
+  .hero p{font-size:17px;color:#3f4046;max-width:480px}
+  .hero .cta{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+  .hero .note{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);margin-top:16px}
+  .heroart{position:relative}
+  .heroart img{width:100%;border-radius:22px;box-shadow:0 30px 70px -24px rgba(40,30,10,.4);border:1px solid var(--line)}
+  .livechip{position:absolute;top:16px;left:16px;display:flex;align-items:center;gap:7px;background:rgba(21,22,26,.9);color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:7px 12px;border-radius:30px}
+  .livechip .d{width:7px;height:7px;border-radius:50%;background:var(--g-green);box-shadow:0 0 8px var(--g-green)}
+  @media(max-width:840px){.hero{grid-template-columns:1fr;padding-top:40px}.hero h1{font-size:48px}.heroart{order:-1}}
+
+  /* tagline strip */
+  .strip{text-align:center;padding:28px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:18px}
+  .strip .t{font-family:var(--disp);font-weight:600;font-size:26px;letter-spacing:.06em;color:var(--tac)}
+  .strip .t span{color:var(--amber)}
+
+  /* section */
+  section{padding:58px 0}
+  .h2{font-family:var(--disp);font-weight:700;font-size:34px;letter-spacing:.02em;color:var(--tac);margin:8px 0 6px}
+  .lead{color:var(--muted);font-size:15.5px;max-width:560px}
+
+  /* lenses */
+  .lenses{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+  @media(max-width:760px){.lenses{grid-template-columns:1fr 1fr}}@media(max-width:480px){.lenses{grid-template-columns:1fr}}
+  .lens{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 22px -16px rgba(20,22,26,.4)}
+  .lens .ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;color:#fff;margin-bottom:12px}
+  .lens h3{font-size:16.5px;font-weight:600;margin-bottom:4px}.lens p{font-size:13.5px;color:var(--muted);line-height:1.45}
+  .lens .ex{font-family:var(--mono);font-size:11px;color:var(--tac);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+
+  /* how */
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+  @media(max-width:760px){.how{grid-template-columns:1fr}}
+  .step{position:relative;padding-left:14px}
+  .step::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:3px}
+  .step:nth-child(1)::before{background:var(--g-blue)}.step:nth-child(2)::before{background:var(--g-green)}.step:nth-child(3)::before{background:var(--g-orange)}
+  .step .n{font-family:var(--disp);font-weight:700;font-size:13px;color:var(--muted-2);letter-spacing:.1em}
+  .step h4{font-size:17px;font-weight:600;margin:4px 0 5px}.step p{font-size:14px;color:var(--muted)}
+
+  /* pillars */
+  .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:8px}
+  @media(max-width:760px){.pillars{grid-template-columns:1fr 1fr}}
+  .pill{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .pill .pi{font-size:20px;margin-bottom:8px}.pill b{font-size:14px;display:block;margin-bottom:3px}.pill span{font-size:12.5px;color:var(--muted)}
+
+  /* charlotte */
+  .charlotte{background:var(--tac);border-radius:26px;padding:38px;color:#fff;position:relative;overflow:hidden}
+  .charlotte::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,var(--g-blue),var(--g-green),var(--g-orange),var(--g-red))}
+  .charlotte .eyebrow{color:var(--amber-2)}
+  .charlotte h3{font-family:var(--disp);font-weight:700;font-size:30px;letter-spacing:.02em;margin:8px 0 10px}
+  .charlotte p{color:#c9c9d1;font-size:15px;max-width:560px}
+  .charlotte .flow{display:flex;align-items:center;gap:10px;margin:18px 0 22px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;flex-wrap:wrap}
+  .charlotte .node{border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:9px 12px;color:#aeaeb8}
+  .charlotte .node.to{border-color:transparent;background:linear-gradient(115deg,rgba(31,116,208,.3),rgba(232,130,31,.35));color:#fff}
+  .charlotte .arrow{color:var(--amber)}
+
+  /* ecosystem */
+  .eco{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+  @media(max-width:760px){.eco{grid-template-columns:1fr}}
+  .ecocard{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:6px}
+  .ecocard .et{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--g-orange)}
+  .ecocard h4{font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:.02em}.ecocard p{font-size:13px;color:var(--muted)}
+  .ecocard a{margin-top:auto;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);padding-top:8px}
+
+  /* pricing teaser */
+  .price{background:linear-gradient(160deg,#fff,var(--bg2));border:1px solid var(--line);border-radius:26px;padding:34px;text-align:center}
+  .price .free{font-family:var(--disp);font-weight:700;font-size:40px;color:var(--tac)}
+  .price .free span{font-size:16px;color:var(--muted);font-weight:500}
+  .price p{color:var(--muted);font-size:14px;margin:8px auto 20px;max-width:440px}
+
+  /* footer */
+  footer{border-top:1px solid var(--line);padding:34px 0;margin-top:30px}
+  .foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .foot .mk{font-family:var(--disp);font-weight:700;font-size:18px;color:var(--tac);letter-spacing:.05em}
+  .foot .social{margin-left:auto;display:flex;gap:10px}
+  .foot .social button,.foot .social a{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .foot .social svg{width:17px;height:17px;fill:var(--ink)}
+  .copy{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted-2);margin-top:18px}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--tac);color:#fff;padding:11px 18px;border-radius:30px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:50}.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<nav><div class="wrap navin">
+  <img src="/spinner-logo.png" alt="Spinner"><div class="mk">SPINNER</div>
+  <div class="links">
+    <a href="#lenses">Lenses</a><a href="#how">How it works</a><a href="#ecosystem">Ecosystem</a><a href="#pricing">Pricing</a>
+    <a class="btn solid launch" href="/spinner/app"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>Launch Spinner</a>
+  </div>
+</div></nav>
+
+<header class="wrap hero">
+  <div>
+    <div class="squad"><i style="background:var(--g-blue)"></i><i style="background:var(--g-green)"></i><i style="background:var(--g-orange)"></i><i style="background:var(--g-red)"></i></div>
+    <h1>One conversation.<br><span class="am">Every angle.</span></h1>
+    <p>SPINNER is a realtime conversation super-app. Set it on the table, and it <b>listens to what's happening</b> — then explains it, live. Translate a language, decode the jargon, get the key in plain terms, the summary, the research, the idea. One tap, any lens. No prompting.</p>
+    <div class="cta">
+      <a class="btn solid" href="/spinner/app"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>Launch Spinner</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+    <div class="note">Free to start · works on the phone in your pocket</div>
+  </div>
+  <div class="heroart">
+    <img src="/spinner-keyart.png" alt="Spinner — realtime conversation super-app">
+    <div class="livechip"><span class="d"></span>Listening…</div>
+  </div>
+</header>
+
+<div class="wrap"><div class="strip"><div class="t">ONE CONVERSATION. <span>EVERY ANGLE.</span></div></div></div>
+
+<!-- LENSES -->
+<section id="lenses" class="wrap">
+  <div class="eyebrow">All modes · one tap, any lens</div>
+  <div class="h2">Six ways to read the room.</div>
+  <div class="lead">Every lens is an angle on the same live conversation. Switch with one tap — Spinner re-reads what's being said.</div>
+  <div class="lenses">
+    <div class="lens"><div class="ico" style="background:var(--g-blue)">🌐</div><h3>Translate</h3><p>Any language in the room, rendered into yours in real time.</p><div class="ex">¡Entendido! → Understood!</div></div>
+    <div class="lens"><div class="ico" style="background:var(--g-teal)">◎</div><h3>Decoder</h3><p>Jargon → plain, plus the tone and intent behind what they said.</p><div class="ex">Tone: curious · Intent: question</div></div>
+    <div class="lens"><div class="ico" style="background:var(--g-orange)">💡</div><h3>Explainer</h3><p>The key idea, in simple terms — no degree required.</p><div class="ex">Here's the key in plain words.</div></div>
+    <div class="lens"><div class="ico" style="background:var(--g-green)">☰</div><h3>Summarize</h3><p>Key points, decisions and action items in seconds.</p><div class="ex">Key points in seconds.</div></div>
+    <div class="lens"><div class="ico" style="background:#7b53c6">🔎</div><h3>Research</h3><p>Pulls the facts behind the conversation, live.</p><div class="ex">The context, sourced.</div></div>
+    <div class="lens"><div class="ico" style="background:#c9a227">✦</div><h3>Ideate</h3><p>Turns what's being said into your next move.</p><div class="ex">Three ways forward →</div></div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section id="how" class="wrap">
+  <div class="eyebrow">How it works</div>
+  <div class="h2">Pick a fork. Let it listen.</div>
+  <div class="how">
+    <div class="step"><div class="n">01</div><h4>Pick a fork</h4><p>A fork is the lens for the moment you're in — a traffic stop, a deal, a doctor's visit. Don't have it? Describe it and we build it.</p></div>
+    <div class="step"><div class="n">02</div><h4>It listens</h4><p>Phone in the mount, Spinner on. It hears the conversation and reacts — it doesn't wait for prompts.</p></div>
+    <div class="step"><div class="n">03</div><h4>Every angle</h4><p>Translate, decode, explain, summarize — switch the lens any time and Spinner re-reads the room.</p></div>
+  </div>
+  <div class="pillars" style="margin-top:30px">
+    <div class="pill"><div class="pi">💬</div><b>All-in-one</b><span>Conversations, decoded.</span></div>
+    <div class="pill"><div class="pi">⚡</div><b>Realtime</b><span>Fast. Fluid. Always live.</span></div>
+    <div class="pill"><div class="pi">👥</div><b>All modes</b><span>One tap. Any lens.</span></div>
+    <div class="pill"><div class="pi">📱</div><b>Mobile-first</b><span>Built for how you move.</span></div>
+  </div>
+</section>
+
+<!-- CHARLOTTE -->
+<section class="wrap"><div class="charlotte">
+  <div class="eyebrow">When a fork isn't enough</div>
+  <h3>Got something bigger? Charlotte builds it.</h3>
+  <p>Most ideas are simple — Chicken&nbsp;Hawk builds them into forks in seconds. But when your idea needs real compute and a deeper builder, Spinner hands you to <b>Charlotte</b> — and she ships it as an <b>aiPLUG you own</b>.</p>
+  <div class="flow"><div class="node">Chicken&nbsp;Hawk · Fork</div><div class="arrow">→</div><div class="node to">Charlotte · aiPLUG</div></div>
+  <a class="btn grad" href="/spinner/app">Build with Charlotte</a>
+</div></section>
+
+<!-- ECOSYSTEM -->
+<section id="ecosystem" class="wrap">
+  <div class="eyebrow">Part of the FOAI ecosystem</div>
+  <div class="h2">Spinner doesn't work alone.</div>
+  <div class="lead">It's one app in the A.I.M.S. / FOAI family — an autonomous-organization platform. Explore what else runs on it.</div>
+  <div class="eco">
+    <div class="ecocard"><div class="et">Live</div><h4>C|Brew</h4><p>Real-time meeting translation + AI minutes — the conversation engine Spinner is built on.</p><a href="https://brewing.foai.cloud/common-cup">Open C|Brew →</a></div>
+    <div class="ecocard"><div class="et">Builder</div><h4>Charlotte</h4><p>The deep builder. Turns big ideas into shippable aiPLUGs with real compute.</p><a href="https://charlotte.foai.cloud">Meet Charlotte →</a></div>
+    <div class="ecocard"><div class="et">Swarm</div><h4>Sqwaadrun</h4><p>The Cyber-Squad design swarm — batch creative, route-autonomous.</p><a href="https://github.com/BoomerAng9/Sqwaadrun">See the squad →</a></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="wrap"><div class="price">
+  <div class="eyebrow">Pricing</div>
+  <div class="free">Free<span> to start</span></div>
+  <p>Get a handful of forks free. Keep building and switching lenses with a subscription — and Charlotte builds are billed only when you ship an aiPLUG.</p>
+  <a class="btn solid" href="/spinner/app">Start free</a>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="foot">
+    <img src="/spinner-logo.png" alt="" style="height:30px;width:30px;object-fit:contain;border-radius:7px"><div class="mk">SPINNER</div>
+    <div class="social">
+      <button onclick="shareNative()" title="Share"><svg viewBox="0 0 24 24"><path d="M18 16a3 3 0 0 0-2.2 1l-7-4a3 3 0 0 0 0-2l7-4A3 3 0 1 0 15 5l-7 4a3 3 0 1 0 0 6l7 4a3 3 0 1 0 3-3z"/></svg></button>
+      <a href="#" id="shareX" title="Share on X"><svg viewBox="0 0 24 24"><path d="M18.9 2H22l-7 8 8.2 12h-6.4l-5-7.3L6 22H3l7.6-8.6L2.5 2H9l4.5 6.6L18.9 2z"/></svg></a>
+      <a href="#" id="shareLI" title="Share on LinkedIn"><svg viewBox="0 0 24 24"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM0 8h5v16H0V8zm7.5 0h4.8v2.2h.07c.67-1.2 2.3-2.5 4.73-2.5 5.06 0 6 3.3 6 7.6V24h-5v-7.1c0-1.7 0-3.9-2.37-3.9-2.38 0-2.74 1.85-2.74 3.77V24h-5V8z"/></svg></a>
+    </div>
+  </div>
+  <div class="copy">© 2026 SPINNER · A.I.M.S. (AI Managed Solutions) · One conversation. Every angle.</div>
+</div></footer>
+<div class="toast" id="toast"></div>
+<script>
+  const URL_="https://brewing.foai.cloud/spinner";
+  const TXT="SPINNER — one conversation, every angle. A realtime conversation super-app.";
+  document.getElementById("shareX").href="https://twitter.com/intent/tweet?text="+encodeURIComponent(TXT)+"&url="+encodeURIComponent(URL_);
+  document.getElementById("shareLI").href="https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(URL_);
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+  async function shareNative(){if(navigator.share){try{await navigator.share({title:"SPINNER",text:TXT,url:URL_})}catch(e){}}else{try{await navigator.clipboard.writeText(URL_);toast("Link copied")}catch(e){toast(URL_)}}}
+</script>
+</body>
+</html>

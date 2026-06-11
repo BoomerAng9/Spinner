@@ -6,7 +6,9 @@
 <title>SPINNER — realtime conversation</title>
 <meta name="theme-color" content="#15161a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href='data:application/manifest+json,{"name":"SPINNER","short_name":"Spinner","start_url":"/spinner","display":"standalone","background_color":"%23eeebe3","theme_color":"%2315161a","icons":[]}'>
+<link rel="icon" href="/spinner-logo.png">
+<link rel="apple-touch-icon" href="/spinner-logo.png">
+<link rel="manifest" href='data:application/manifest+json,{"name":"SPINNER","short_name":"Spinner","start_url":"/spinner","display":"standalone","background_color":"%23eeebe3","theme_color":"%2315161a","icons":[{"src":"/spinner-logo.png","sizes":"512x512","type":"image/png"}]}'>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -22,6 +24,7 @@
   .app{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;position:relative;overflow:hidden}
 
   header{display:flex;align-items:center;gap:9px;padding:18px 20px 6px}
+  .hlogo{height:34px;width:34px;object-fit:contain;border-radius:8px}
   .mk{font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:.05em;color:var(--tac);line-height:1}
   .visor{width:9px;height:9px;border-radius:2px;background:var(--amber);box-shadow:0 0 9px rgba(242,169,0,.8);margin-bottom:2px}
   .spacer{flex:1}
@@ -105,7 +108,7 @@
 <div class="app">
   <header>
     <button class="back" id="backBtn" style="display:none" onclick="toForks()">‹ Forks</button>
-    <div class="mk" id="hMark">SPINNER</div><div class="visor"></div>
+    <img class="hlogo" src="/spinner-logo.png" alt="Spinner"><div class="mk" id="hMark">SPINNER</div>
     <div class="spacer"></div>
     <div class="tier" id="tier">Free · <b id="freeLeft">2 forks left</b></div>
   </header>
