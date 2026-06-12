@@ -75,7 +75,7 @@ its trigger/action/export wiring and plugs into the same Spinner engine. See
 
 | App | Status | What it does |
 |---|---|---|
-| **Coastal Companion** | **LIVE** | Real-time multilingual meeting translation + AI meeting notes. $24/mo (Stripe live). |
+| **Coastal Companion** | **LIVE** | Real-time multilingual meeting translation + **live speech-to-speech duplex** (FOAI-Charlotte voice) + AI meeting notes. Free metered translation; $24/mo Spinner+ for voice/realtime (Stripe live). |
 | Customer engagement | PLANNED | Product/service Q&A that can act (build a cart). Closest to done — the Spinner cart/catalog actions already exist. |
 | NIL advice | PLANNED | Informational guidance framed by school/state NIL rules. Not legal advice. |
 | Legal | PLANNED | Advice-adjacent, cited, paper-trailed (unauthorized-practice-of-law caution). |
@@ -108,9 +108,27 @@ docs/
   ROADMAP.md                       verticals with honest LIVE/PLANNED status
 core/
   spinner_runtime.py               the real execution engine (verbatim from live Coastal)
+service/                           the DEPLOYABLE Spinner backend service
+  spinner_service.py               app surface — translate/decode/lens/voice/realtime (verbatim from live)
+  app.py                           FastAPI entrypoint (token-gated) + /healthz
+  identity.py                      decoupling seam — shared-secret cookie + pluggable tier source
+  Dockerfile / docker-compose.yml  run as a sibling container on aims_aims-network
+  README.md                        how the service is consumed (the Stage-Zero pattern)
 apps/
   README.md                        app registry index
   coastal-companion/app.json       first app — LIVE
+  spinner-web/                     the Spinner web app (index.html) + landing
 platform/
   triggers.md                      trigger-point catalog (intent → action, LIVE vs PLANNED)
 ```
+
+## The service
+
+The engine docs above describe *what* Spinner does; [`service/`](service/) is the
+**deployable backend** that does it — the realtime app surface (translate, decode,
+explain, summarize, research, ideate, voice, and the live speech-to-speech
+**realtime duplex**), extracted from the live Coastal deployment. Other projects
+consume it the way they consume **Stage Zero** and the **Tool Warehouse**: an
+independent, token-gated service called over the mesh. Coastal Brewing is the first
+consumer — surfaced there as **"Coastal Companion"**. See
+[`service/README.md`](service/README.md).

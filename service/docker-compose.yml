@@ -1,0 +1,30 @@
+# Standalone Spinner service — deploy as a sibling container on the shared
+# aims_aims-network, the same way Stage Zero and the Tool Warehouse run. Bound to
+# loopback; the consuming app (Coastal) reaches it by container name on the mesh,
+# and nginx fronts the public surface (spinner.aimanagedsolutions.cloud).
+services:
+  spinner:
+    build: .
+    image: spinner-service:latest
+    container_name: spinner-service
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:8095:8080"
+    volumes:
+      - spinner_data:/app/data
+    networks:
+      - aims_aims-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8080/healthz',timeout=5).status==200 else 1)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+
+volumes:
+  spinner_data:
+
+networks:
+  aims_aims-network:
+    external: true

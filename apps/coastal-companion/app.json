@@ -1,9 +1,12 @@
 {
   "id": "coastal-companion",
   "name": "Coastal Companion",
-  "description": "Real-time multilingual meeting translation plus AI meeting notes. Live audio/text is detected and translated into a chosen main language, and the transcript is synthesized into formatted notes.",
+  "description": "Real-time multilingual meeting translation plus AI meeting notes. Live audio/text is detected and translated into a chosen main language, spoken back in real time, and the transcript is synthesized into formatted notes. 'Coastal Companion' is the branded label of the Spinner extension inside Coastal Brewing.",
+
+  "backend": "Spinner service (../../service) — exposes /api/v1/companion/*. Deployed inline on coastal-runner today; migrating to the standalone `spinner-service` container (parallel, then cut over). The host field below reflects the current reality, not the end state.",
 
   "surfaces": [
+    "https://brewing.foai.cloud/spinner/app",
     "https://brewing.foai.cloud/common-cup",
     "https://cbrew.foai.cloud/common-cup"
   ],
@@ -13,8 +16,20 @@
       "method": "POST",
       "path": "/api/v1/companion/ingest",
       "host": "coastal-runner",
-      "model": "google/gemini-2.5-flash-lite",
-      "notes": "Audio/text in. Detects the source language and translates to the chosen main language (the target frame)."
+      "model": "google/gemini-2.5-flash-lite (paid) | nex-n2-pro:free (free)",
+      "notes": "Audio/text in. Detects the source language and translates to the chosen main language (the target frame). Freemium-gated."
+    },
+    "lens": {
+      "method": "POST",
+      "path": "/api/v1/companion/lens",
+      "host": "coastal-runner",
+      "notes": "explain | research | summarize | ideate over a turn or transcript. Paid text routes via the Inworld Router."
+    },
+    "decode": {
+      "method": "POST",
+      "path": "/api/v1/companion/decode",
+      "host": "coastal-runner",
+      "notes": "Decode industry/jargon for the active fork."
     },
     "synthesize": {
       "method": "POST",
@@ -22,6 +37,32 @@
       "host": "coastal-runner",
       "model": "google/gemini-2.5-flash",
       "notes": "Transcript + format in. Produces meeting notes in the requested export format."
+    },
+    "voices": {
+      "method": "GET",
+      "path": "/api/v1/companion/voices",
+      "host": "coastal-runner",
+      "notes": "Inworld voice catalog (custom dashboard voices first). Free to browse."
+    },
+    "speak": {
+      "method": "POST",
+      "path": "/api/v1/companion/speak",
+      "host": "coastal-runner",
+      "model": "inworld-tts-2",
+      "notes": "Speak a line via Inworld TTS (MP3). PAID (Spinner+)."
+    },
+    "realtime": {
+      "method": "WS",
+      "path": "/api/v1/companion/realtime/stream",
+      "host": "coastal-runner",
+      "model": "inworld realtime (google-vertex/gemini-2.5-flash-lite + inworld realtime TTS)",
+      "notes": "Full-duplex live speech-to-speech interpreter. PCM16 24kHz both ways; server semantic VAD. Speaks in the FOAI-Charlotte voice. PAID (Spinner+); idle + max-duration cost guard."
+    },
+    "plan": {
+      "method": "GET",
+      "path": "/api/v1/companion/plan",
+      "host": "coastal-runner",
+      "notes": "Tier + usage meter + pricing — drives the freemium meter + upgrade paywall."
     }
   },
 
@@ -32,6 +73,12 @@
       "id": "speech-in-other-language",
       "intent": "incoming audio/text in any language during a meeting",
       "action": "translate-to-main-language",
+      "status": "live"
+    },
+    {
+      "id": "live-conversation",
+      "intent": "continuous two-way spoken conversation (the user wants live, spoken interpretation)",
+      "action": "realtime-interpret",
       "status": "live"
     },
     {
@@ -51,7 +98,17 @@
   "actions": [
     {
       "id": "translate-to-main-language",
-      "description": "Detect the source language and translate ingested audio/text into the chosen main language via POST /api/v1/companion/ingest (google/gemini-2.5-flash-lite).",
+      "description": "Detect the source language and translate ingested audio/text into the chosen main language via POST /api/v1/companion/ingest.",
+      "status": "live"
+    },
+    {
+      "id": "realtime-interpret",
+      "description": "Full-duplex live speech-to-speech translation over WS /api/v1/companion/realtime/stream (Inworld realtime), spoken back in the FOAI-Charlotte voice. PAID.",
+      "status": "live"
+    },
+    {
+      "id": "speak-translation",
+      "description": "Speak a translated/explained line aloud via Inworld TTS, POST /api/v1/companion/speak. PAID.",
       "status": "live"
     },
     {
@@ -77,6 +134,7 @@
 
   "guardrails": [
     "Translation and notes are assistive; the original-language transcript is retained for verification.",
+    "Free-tier translation runs on non-private models and is metered (300k tokens/mo) — disclosed in-product; paid tier is secure.",
     "No medical, legal, or financial advice is generated by this app."
   ],
 
@@ -85,6 +143,7 @@
   "pricing": {
     "amount": "$24",
     "interval": "month",
-    "processor": "stripe-live"
+    "processor": "stripe-live",
+    "free_tier": "Translation is free (metered, non-private). Voice + realtime duplex are Spinner+ (paid)."
   }
 }
