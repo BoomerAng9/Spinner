@@ -136,8 +136,10 @@ async def relay_gemini(websocket, *, target, source, mode, device,
                                 await session.send_realtime_input(audio_stream_end=True)
                             except Exception:
                                 pass
-                except Exception:
-                    pass
+                except Exception as exc:
+                    log.warning("gemini client->upstream ended: %s: %s", type(exc).__name__, exc)
+                else:
+                    log.info("gemini client->upstream loop ended (client closed)")
 
             async def _open_response():
                 if not state["resp_open"]:
