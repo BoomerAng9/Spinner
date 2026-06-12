@@ -240,6 +240,10 @@
     <div class="setrow"><div class="sl"><b>Auto-listen</b><span>Open the mic when you go live</span></div><div class="tog" id="togMic" onclick="toggleSet('mic')"></div></div>
     <div class="setrow"><div class="sl"><b>Drive mode</b><span>Dark, high-contrast for the car</span></div><div class="tog" id="togDark" onclick="toggleSet('dark')"></div></div>
     <div class="setrow"><div class="sl"><b>Speak responses</b><span>Spinner talks back · Spinner+</span></div><div class="tog" id="togSpeak" onclick="toggleSet('speak')"></div></div>
+    <div class="setrow"><div class="sl"><b>Live engine</b><span>FOAI voice vs natural babel-fish</span></div>
+      <select id="setEngine" onchange="setSetting('engine',this.value)">
+        <option value="inworld">FOAI-Charlotte voice (Inworld)</option><option value="gemini">Natural voice · keeps speaker (Gemini)</option>
+      </select></div>
     <div class="setrow"><div class="sl"><b>Voice</b><span>Your custom voices + Inworld</span></div>
       <select id="setVoice" onchange="setSetting('voice',this.value)"><option>Loading…</option></select></div>
     <div style="padding:13px 0">
@@ -334,7 +338,8 @@ let forks=JSON.parse(localStorage.getItem("spinner_forks")||"null")||DEFAULT_FOR
 let selected=null, active=null;
 let curLens="decode", transcript=[];
 const LENS_LABEL={translate:"Translate",decode:"Decoder",explain:"Explainer",summarize:"Summarize",research:"Research",ideate:"Ideate"};
-let settings=JSON.parse(localStorage.getItem("spinner_settings")||"null")||{lang:"en",mic:false,dark:false,speak:false,voice:""};
+let settings=JSON.parse(localStorage.getItem("spinner_settings")||"null")||{lang:"en",mic:false,dark:false,speak:false,voice:"",engine:"inworld"};
+if(!settings.engine)settings.engine="inworld";
 function saveSettings(){localStorage.setItem("spinner_settings",JSON.stringify(settings))}
 async function api(path,body){
   body.target_lang=settings.lang||"en";
@@ -432,7 +437,7 @@ function openNew(){$("scrim").classList.add("show");$("newModal").classList.add(
 function closeModal(){$("scrim").classList.remove("show");closeAllModals()}
 
 /* ── Account + Settings ── */
-function openMenu(){$("scrim").classList.add("show");$("menuModal").classList.add("show");$("setLang").value=settings.lang;$("togMic").classList.toggle("on",!!settings.mic);$("togDark").classList.toggle("on",!!settings.dark);$("togSpeak").classList.toggle("on",!!settings.speak);renderForkMng();loadMe();loadVoices();}
+function openMenu(){$("scrim").classList.add("show");$("menuModal").classList.add("show");$("setLang").value=settings.lang;$("togMic").classList.toggle("on",!!settings.mic);$("togDark").classList.toggle("on",!!settings.dark);$("togSpeak").classList.toggle("on",!!settings.speak);var se=$("setEngine");if(se)se.value=settings.engine||"inworld";renderForkMng();loadMe();loadVoices();}
 async function loadMe(){
   let me=null;try{me=await fetch("/api/v1/auth/me").then(r=>r.json())}catch(e){}
   const box=$("acctBox");
@@ -526,7 +531,7 @@ async function startRealtime(){
   catch(e){ctx=new(window.AudioContext||window.webkitAudioContext)();}
   const target=settings.lang||"en",voice=settings.voice||"";
   const proto=location.protocol==="https:"?"wss":"ws";
-  const url=`${proto}://${location.host}${API}/realtime/stream?target=${encodeURIComponent(target)}&voice=${encodeURIComponent(voice)}&device=${encodeURIComponent(DEV)}&mode=interpreter`;
+  const url=`${proto}://${location.host}${API}/realtime/stream?target=${encodeURIComponent(target)}&voice=${encodeURIComponent(voice)}&device=${encodeURIComponent(DEV)}&mode=interpreter&engine=${encodeURIComponent(settings.engine||"inworld")}`;
   let ws;try{ws=new WebSocket(url);}catch(e){toast("Live unavailable");try{ctx.close()}catch(_){}stream.getTracks().forEach(t=>t.stop());return;}
   rt={ws,ctx,stream,src:null,node:null,analyser:null,playHead:0,sources:new Set(),buf:[],bufLen:0,heardEl:null,transEl:null,transTxt:""};
   $("liveBtn").classList.add("live");$("pulse").classList.add("live");$("lState").textContent="Connecting live…";

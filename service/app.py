@@ -31,6 +31,7 @@ from fastapi.responses import JSONResponse
 
 import identity
 import inworld_router
+import realtime_engines
 import spinner_service
 
 app = FastAPI(title="Spinner Service", version="1.0")
@@ -66,6 +67,8 @@ def healthz():
         "status": "ok",
         "service": "spinner",
         "realtime_configured": bool(os.environ.get("INWORLD_REALTIME_API_KEY", "").strip()),
+        "engine_inworld": bool(os.environ.get("INWORLD_REALTIME_API_KEY", "").strip()),
+        "engine_gemini": realtime_engines.configured_gemini(),
         "tts_configured": bool(os.environ.get("INWORLD_API_KEY", "").strip()),
         "router_configured": inworld_router.configured(),
         "openrouter_configured": bool(os.environ.get("OPENROUTER_API_KEY", "").strip()),

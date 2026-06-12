@@ -1277,6 +1277,7 @@ async def realtime_stream(websocket: WebSocket) -> None:
     mode = (qp.get("mode") or "interpreter").strip()
     device = (qp.get("device") or "").strip()
     voice = (qp.get("voice") or _SPINNER_DEFAULT_VOICE).strip()
+    engine = (qp.get("engine") or "inworld").strip()  # inworld (brand voice) | gemini (voice-preserving)
 
     # PAID gate — the realtime LLM+TTS bills per second; never free.
     uid = _coastal_uid_from_cookie_header(websocket.headers.get("cookie", ""))
@@ -1289,6 +1290,17 @@ async def realtime_stream(websocket: WebSocket) -> None:
         except Exception:
             pass
         await websocket.close(code=4402, reason="upgrade required")
+        return
+
+    # Engine dispatch — pluggable realtime backend. Gemini = voice-preserving
+    # babel-fish (Google Live Translate); default Inworld = FOAI-Charlotte brand
+    # voice + the explain/decode lenses. The browser protocol is identical for both.
+    if engine == "gemini":
+        import realtime_engines  # noqa: PLC0415
+        await realtime_engines.relay_gemini(
+            websocket, target=target, source=source, mode=mode, device=device,
+            idle_s=_RT_IDLE_SECONDS, max_s=_RT_MAX_SECONDS,
+            main_lang_name=_main_lang_name(target))
         return
 
     key = _rt_key()
