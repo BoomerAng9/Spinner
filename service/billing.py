@@ -37,6 +37,28 @@ router = APIRouter(prefix="/api/v1/billing", tags=["billing"])
 _PACKS = {f"{t}_{p}": (t, p, (12 if p == 9 else p))
           for t in ("drip", "flow", "current") for p in (3, 6, 9)}
 
+# CUSTOMER-FACING names only. The internal tier keys (drip/flow/current) and the
+# "slow-drip" mechanic are NEVER shown to the user — the app renders these labels.
+DISPLAY = {"bmc": "Buy Me a Coffee", "drip": "Tier 1", "flow": "Tier 2", "current": "Tier 3"}
+
+
+def _plan_name(sku: str) -> str:
+    if sku == "bmc":
+        return DISPLAY["bmc"]
+    tier, paid, _ = _PACKS[sku]
+    return f"{DISPLAY[tier]} - {paid}-month"
+
+
+def plan_label(tier: str) -> str:
+    """Customer-friendly label for a tier — never exposes internal names."""
+    if tier == "free":
+        return "Free"
+    if tier in DISPLAY:
+        return DISPLAY[tier]
+    if tier.startswith("appsumo_t"):
+        return f"AppSumo Tier {tier[-1]}"
+    return "Plan"
+
 
 def _amount_cents(sku: str) -> int:
     if sku == "bmc":
@@ -90,23 +112,24 @@ def offer(request: Request, fork_attempt: bool = False):
     free→bmc on exhaustion|fork-attempt; bmc→plans at 20%-remaining; exhausted→overage(LUC)."""
     uid = _uid(request)
     if not uid:
-        return {"offer": None, "tier": "free", "balance": 0}
+        return {"offer": None, "plan_name": "Free", "balance": 0}
     offer = E.next_offer(uid, fork_attempt=fork_attempt)
-    out = {"offer": offer, **E.status(uid)}
+    s = E.status(uid)
+    out = {"offer": offer, "plan_name": plan_label(s["tier"]), "balance": s["balance"]}
     if offer == "bmc":
         out["sku"] = "bmc"
     elif offer == "plans":
-        out["skus"] = [s for s in (f"{t}_{p}" for t in ("drip", "flow", "current") for p in (3, 6, 9))]
+        out["skus"] = [f"{t}_{p}" for t in ("drip", "flow", "current") for p in (3, 6, 9)]
     return out
 
 
 @router.get("/catalog")
 def catalog():
-    """Non-secret SKU list for the app to render REVEALED offers (slow-drip decides when)."""
-    items = [{"sku": "bmc", "tier": "bmc", "amount_cents": _amount_cents("bmc"),
-              "kind": "onetime", "configured": bool(_price_env("bmc"))}]
+    """Customer-facing SKU list (clean names only — no internal tier/slow-drip terms)."""
+    items = [{"sku": "bmc", "name": _plan_name("bmc"), "amount_cents": _amount_cents("bmc"),
+              "kind": "onetime", "repeatable": True, "configured": bool(_price_env("bmc"))}]
     for sku, (tier, paid, access) in _PACKS.items():
-        items.append({"sku": sku, "tier": tier, "paid_months": paid, "access_months": access,
+        items.append({"sku": sku, "name": _plan_name(sku), "months": paid, "access_months": access,
                       "amount_cents": _amount_cents(sku), "kind": "pack",
                       "configured": bool(_price_env(sku))})
     return {"billing_configured": _configured(), "items": items}
