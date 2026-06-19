@@ -5,3 +5,4 @@ requests>=2.31
 websockets>=12.0
 google-genai>=1.0
 psycopg[binary]>=3.2          # Neon Postgres (profile/memory, token ledger, entitlements)
+stripe>=9.0                   # billing: checkout + webhook fulfillment
