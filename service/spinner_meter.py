@@ -81,3 +81,18 @@ def usage_add(meter_id: str, period: str, tokens: int) -> None:
                 c.close()
     except Exception:
         pass
+    _mirror_to_ledger(meter_id, period, tokens)
+
+
+def _mirror_to_ledger(meter_id: str, period: str, tokens: int) -> None:
+    """Best-effort: mirror uid-keyed consumption into the Neon entitlements ledger so
+    the slow-drip balance reflects real usage. No-op for anon/device meters or when
+    DATABASE_URL is unset. Never raises."""
+    try:
+        if not meter_id.startswith("uid:") or not os.environ.get("DATABASE_URL", "").strip():
+            return
+        uid = meter_id[len("uid:"):]
+        import entitlements as _E
+        _E.consume_tokens(uid, int(tokens or 0), model="meter", reference=f"usage:{period}")
+    except Exception:
+        pass
