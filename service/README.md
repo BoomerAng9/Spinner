@@ -21,6 +21,7 @@ mesh — not code copied into each vertical.
 | `identity.py` | **The decoupling seam.** Verifies the shared-secret `coastal_uid` cookie; pluggable paid-tier source (`local` SQLite or `callback` to the consuming app). Fails closed. |
 | `api_server.py`, `audit_ledger.py` | **Shims** — minimal stand-ins for the Coastal modules `spinner_service.py` imports, delegating to `identity.py`. They load only in this container (never shadow Coastal's real modules). |
 | `app.py` | FastAPI entrypoint: service-token gate + `/healthz` + mounts the router. |
+| `db.py`, `migrations/` | **Neon Postgres** layer (psycopg3): env-only `DATABASE_URL`, `healthcheck()` + idempotent `migrate()`. Core tables: `spinner_profile` (global profile/memory), `spinner_memory` (RAG log), `spinner_token_ledger`, `spinner_entitlement`. |
 | `Dockerfile`, `docker-compose.yml`, `.env.example` | Deploy as a sibling container on `aims_aims-network`. |
 
 ## Surface
@@ -64,6 +65,27 @@ cp .env.example .env      # fill in keys + SPINNER_AUTH_SECRET + SPINNER_SERVICE
 docker compose up -d --build
 curl -s http://127.0.0.1:8095/healthz | jq
 ```
+
+## Database (Neon Postgres)
+
+The service connects with `DATABASE_URL` (Neon `-pooler` host, `sslmode=require` +
+`channel_binding=require`). **The real connection string is never committed** — it
+lives in the deploy environment / gitignored `.env` only.
+
+```bash
+python db.py healthcheck     # verify connectivity (prints non-secret status)
+python db.py migrate         # apply migrations/*.sql once, in order (idempotent)
+```
+
+**Interactive human access — passwordless** (browser OAuth, nothing to paste or
+store, so the credential is never exposed):
+
+```bash
+psql -h pg.neon.tech
+```
+
+Use the passwordless flow for ad-hoc querying; the running service uses
+`DATABASE_URL`. Migrations are tracked in `schema_migrations`.
 
 ## Provenance / cut-over
 
