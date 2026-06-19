@@ -33,6 +33,7 @@ import identity
 import inworld_router
 import realtime_engines
 import spinner_service
+import billing
 
 app = FastAPI(title="Spinner Service", version="1.0")
 
@@ -53,7 +54,8 @@ _REQUIRE_TOKEN = os.environ.get("SPINNER_REQUIRE_SERVICE_TOKEN", "true").strip()
 async def _service_token_gate(request: Request, call_next):
     path = request.url.path
     if (_REQUIRE_TOKEN and _SERVICE_TOKEN and path.startswith("/api/")
-            and "/realtime/stream" not in path):  # WS authenticates via cookie
+            and "/realtime/stream" not in path        # WS authenticates via cookie
+            and "/billing/webhook" not in path):       # Stripe webhook is secured by signature
         tok = (request.headers.get("x-service-token")
                or request.query_params.get("service_token"))
         if tok != _SERVICE_TOKEN:
@@ -80,3 +82,4 @@ def healthz():
 
 identity.init()
 app.include_router(spinner_service.router)
+app.include_router(billing.router)
