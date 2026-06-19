@@ -84,6 +84,22 @@ def _fulfill(uid: str, sku: str, source: str) -> None:
 
 
 # ── Endpoints ───────────────────────────────────────────────────────────────
+@router.get("/offer")
+def offer(request: Request, fork_attempt: bool = False):
+    """Slow-drip reveal surface (INTERNAL — the app shows an offer ONLY when this returns one).
+    free→bmc on exhaustion|fork-attempt; bmc→plans at 20%-remaining; exhausted→overage(LUC)."""
+    uid = _uid(request)
+    if not uid:
+        return {"offer": None, "tier": "free", "balance": 0}
+    offer = E.next_offer(uid, fork_attempt=fork_attempt)
+    out = {"offer": offer, **E.status(uid)}
+    if offer == "bmc":
+        out["sku"] = "bmc"
+    elif offer == "plans":
+        out["skus"] = [s for s in (f"{t}_{p}" for t in ("drip", "flow", "current") for p in (3, 6, 9))]
+    return out
+
+
 @router.get("/catalog")
 def catalog():
     """Non-secret SKU list for the app to render REVEALED offers (slow-drip decides when)."""
