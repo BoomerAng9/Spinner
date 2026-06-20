@@ -55,7 +55,7 @@ async def _service_token_gate(request: Request, call_next):
     path = request.url.path
     if (_REQUIRE_TOKEN and _SERVICE_TOKEN and path.startswith("/api/")
             and "/realtime/stream" not in path        # WS authenticates via cookie
-            and "/billing/webhook" not in path):       # Stripe webhook is secured by signature
+            and "/api/v1/billing/" not in path):       # billing is cookie/Stripe-signature authed, not bridge
         tok = (request.headers.get("x-service-token")
                or request.query_params.get("service_token"))
         if tok != _SERVICE_TOKEN:
