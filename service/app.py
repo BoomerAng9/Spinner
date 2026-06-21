@@ -34,6 +34,8 @@ import inworld_router
 import realtime_engines
 import spinner_service
 import billing
+import account
+import learning
 
 app = FastAPI(title="Spinner Service", version="1.0")
 
@@ -83,3 +85,5 @@ def healthz():
 identity.init()
 app.include_router(spinner_service.router)
 app.include_router(billing.router)
+app.include_router(account.router)
+app.include_router(learning.router)
